@@ -1,0 +1,234 @@
+---
+title: "linear regression"
+output: html_document
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+```{r}
+library(readxl)
+library(readr)
+library(car)
+library(MASS)
+```
+
+# 1. simple linear regression
+```{r}
+data1 <- read_excel("C:/Users/wjssm/Desktop/lr/data1.XLS")
+data1
+lr1 <- lm(y ~ x , data = data1)
+lr1
+summary(lr1)
+
+```
+
+
+###residual(잔차)
+```{r}
+res<-resid(lr1) # data1$y-predict(lr1, data1)
+plot(res)
+plot(lr1, which=1:2)
+```
+
+
+
+* graph 설명
+- 1 잔차 vs 순서 그림 : 독립성 가정 확인
+- 2-잔차 vs 적합치 : 등분산성 가정 확인
+- 3-잔차의 Q-Q plot : 정규성 가정 확인
+
+
+
+```{r}
+plot(data1$x,data1$y)
+abline(lr1$coefficients[1], lr1$coefficients[2],col="red")
+
+summary(lr1)
+summary(lr1)$r.squared
+```
+
+
+
+#2.multiple linear regression
+```{r}
+data(Boston);str(Boston)
+
+lr2<-lm(medv~., data = Boston) #lm(y~x1+x2) or lm(y~.-x1-x2)
+summary(lr2)
+```
+
+
+###residual(잔차)
+```{r}
+res2<-resid(lr2) 
+plot(res2)
+plot(lr2, which=1:2)
+```
+
+
+
+잔차의 독립성, 정규성, 등분산성 확인
+
+
+
+###multicolinearity(다중공선성)
+
+#####correlation
+```{r}
+cor(Boston[,-14])
+symnum(abs(round(cor(Boston[,-14]),2))) 
+```
+tax, rad변수 상관관계 매우 높음.
+
+
+
+#####vif : 보통 vif>5 주의, vif > 10 다중공선성이 있다고 판단.
+```{r}
+vif(lr2) 
+```
+vif 값 역시 tax, rad변수 값이 매우 큼.
+
+
+* variable
+- tax : full-value property-tax rate per \$10,000.
+- index of accessibility to radial highways.
+
+
+
+```{r}
+lr22<-lm(medv ~. -tax, data=Boston)
+summary(lr2)$r.squared; summary(lr22)$r.squared
+```
+tax 변수가 빠져도 R^2 값은 별 차이 없음. 
+R^2값이 절대적인 모형선택의 기준이라고 할 수 없음. 
+이럴 경우엔 더 simple한 모형이 좋음.
+
+
+
+###variable selection
+
+- step : AIC를 기준으로 좋은 모형을 찾아줌.
+
+
+```{r}
+#1.backward elimination (default)
+###한 번 빠진 변수는 다시 추가될 수 없음.
+step(lr2)
+#2.forward selection
+###한 번 추가된 변수는 다시 빠질 수 없음.
+lr2m<-lm(medv ~ 1, data=Boston)
+step(lr2m, direction="forward", scope=formula(lr2))
+#3.both
+step(lr2, direction='both')
+```
+
+
+
+#3.dummy variable
+```{R}
+apt <- read_delim("C:/Users/wjssm/Desktop/lr/apt.txt","\t", escape_double = FALSE,
+                  trim_ws = TRUE)
+apt
+
+table(apt$subway) #아파트 근처의 지하철 개수 
+```
+
+```{r}
+lm(y~.,data = apt)
+
+####package 사용 library(dummies) 사용해도 됨.
+
+
+###as.numeric
+apt$bigcompany <- as.numeric(apt$company=='HD' | apt$company=='SS')
+
+apt
+```
+
+
+
+#4.variable transforamtion
+
+- 변수 변환은 로그변환, 역수 등 여러가지
+- 다양한 상황에서 변환할 수 있음.등
+(잔차의 가정을 만족시키지 못한 경우, 선형관계가 잘 보이지 않을 경우 등)
+
+
+
+
+```{R}
+attach(apt)
+
+par(mfrow=c(2,2))
+plot(year, y)
+plot(size, y)
+plot(volume, y)
+plot(bigcompany, y)
+
+#y transformation
+plot(year, log(y))
+plot(size, log(y))
+plot(volume, log(y))
+plot(bigcompany, log(y))
+
+
+```
+
+
+```{r}
+ld1<-lm(y~year+size+volume+bigcompany, data = apt)
+s1<-step(ld1); summary(s1) #AIC=4214.8, R-squared:  0.8774
+```
+
+```{r}
+ld2<-lm(log(y)~year+size+volume+bigcompany, data = apt)
+s2<-step(ld2); summary(s2) #AIC=-802.75, R-squared:  0.8906
+
+```
+
+```{r}
+ld3<-lm(y~(year+size+volume+bigcompany)^2, data = apt)
+s3<-step(ld3); summary(s3) #AIC=4164.96, R-squared:  0.9048
+```
+
+```{r}
+ld4<-lm(log(y)~(year+size+volume+bigcompany)^2, data = apt)
+s4<-step(ld4); summary(s4) #AIC=-829.92, R-squared:  0.905
+
+```
+
+
+
+```{r}
+data.frame('R-squared' = c(summary(s1)$r.squared,summary(s2)$r.squared,
+                         summary(s3)$r.squared,summary(s4)$r.squared),
+           'p' = c(extractAIC(s1)[1],extractAIC(s2)[1],extractAIC(s3)[1],extractAIC(s4)[1]),
+          'AIC' = c(extractAIC(s1)[2],extractAIC(s2)[2],extractAIC(s3)[2],extractAIC(s4)[2]),
+           row.names = c('y','logy','y_^2','logy_^2'))
+
+```
+
+
+##### R-squared
+- p가 커지면, R^2는 반드시 커짐.
+- 1번 모델 -> 2번 모델 p의 개수 동일함에도 R-squared증가
+- 3번 모델 -> 4번 모델 p감소 하였음에도 R-suqred증가가
+
+log(y) transformation이 좋은 결과를 낳음.
+
+
+
+##### AIC
+- 1번,3번 모델끼리, 2번,4번 모델끼리 비교만 가능.
+- AIC가 더 작은 3번, 4번이 더 좋음.
+
+
+
+
+
+AIC, R^2 외에도 Cp, MSE 등 좋은 모델을 선택하는 데에는 여러가지 기준이 있음.
+
+
