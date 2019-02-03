@@ -7,3 +7,4 @@
 * [week4](https://github.com/miniii222/BOAZ_session/tree/master/week%204) : 시각화
 * [week5](https://github.com/miniii222/BOAZ_session/tree/master/week%205) : 모델 평가 및 검증
 * [week6](https://github.com/miniii222/BOAZ_session/tree/master/week%206) : linear regression
+* [week6](https://github.com/miniii222/BOAZ_session/tree/master/week%207) : SVM
