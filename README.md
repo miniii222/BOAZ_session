@@ -5,3 +5,5 @@
 * [week2](https://github.com/miniii222/BOAZ_session/tree/master/week%202) : 전처리
 * [week3](https://github.com/miniii222/BOAZ_session/tree/master/week%203) : 크롤링(공동세션)
 * [week4](https://github.com/miniii222/BOAZ_session/tree/master/week%204) : 시각화
+* [week5](https://github.com/miniii222/BOAZ_session/tree/master/week%205) : 모델 평가 및 검증
+* [week6](https://github.com/miniii222/BOAZ_session/tree/master/week%206) : linear regression
