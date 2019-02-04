@@ -8,4 +8,5 @@
 * [week5](https://github.com/miniii222/BOAZ_session/tree/master/week%205) : 모델 평가 및 검증
 * [week6](https://github.com/miniii222/BOAZ_session/tree/master/week%206) : linear regression
 * [week7](https://github.com/miniii222/BOAZ_session/tree/master/week%207) : SVM
-* [mini project](https://github.com/miniii222/BOAZ_session/tree/master/mini_project) : base session 마무리하며 미니 
+* [mini project](https://github.com/miniii222/BOAZ_session/tree/master/mini_project) : base session 마무리하며 미니 project
+
